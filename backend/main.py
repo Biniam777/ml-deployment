@@ -21,9 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# -----------------------
-# SAFE MODEL PATHS (VERCEL FIX)
-# -----------------------
+
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR / "models"
 
