@@ -3,11 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
 import pandas as pd
+from pathlib import Path
 
+# -----------------------
+# APP INIT 
+# -----------------------
 app = FastAPI(title="Breast Cancer Prediction API")
 
 # -----------------------
-# CORS (REQUIRED)
+# CORS
 # -----------------------
 app.add_middleware(
     CORSMiddleware,
@@ -18,11 +22,17 @@ app.add_middleware(
 )
 
 # -----------------------
-# LOAD MODELS
+# SAFE MODEL PATHS (VERCEL FIX)
 # -----------------------
-lr_model = joblib.load("models/logistic_regression.joblib")
-dt_model = joblib.load("models/decision_tree.joblib")
-scaler = joblib.load("models/scaler.joblib")
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_DIR = BASE_DIR / "models"
+
+try:
+    lr_model = joblib.load(MODEL_DIR / "logistic_regression.joblib")
+    dt_model = joblib.load(MODEL_DIR / "decision_tree.joblib")
+    scaler = joblib.load(MODEL_DIR / "scaler.joblib")
+except Exception as e:
+    raise RuntimeError(f"Model loading failed: {e}")
 
 # -----------------------
 # FEATURE CONFIG
@@ -42,6 +52,9 @@ class CancerInput(BaseModel):
     features: list[float]
 
 
+# -----------------------
+# ROUTES
+# -----------------------
 @app.get("/")
 def root():
     return {"message": "Breast Cancer Prediction API is running"}
@@ -55,10 +68,7 @@ def predict_logistic(data: CancerInput):
             detail=f"Expected exactly {EXPECTED_FEATURES} features"
         )
 
-    # Convert input to DataFrame with feature names
     X = pd.DataFrame([data.features], columns=FEATURE_NAMES)
-
-    # Scale & predict
     X_scaled = scaler.transform(X)
     prediction = int(lr_model.predict(X_scaled)[0])
 
@@ -76,9 +86,7 @@ def predict_tree(data: CancerInput):
             detail=f"Expected exactly {EXPECTED_FEATURES} features"
         )
 
-    # Convert input to DataFrame with feature names
     X = pd.DataFrame([data.features], columns=FEATURE_NAMES)
-
     prediction = int(dt_model.predict(X)[0])
 
     return {
