@@ -4,13 +4,14 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Copy backend code + models + static folder
+# Copy backend folder contents into /app
 COPY . /app
 
-# Install dependencies
+
+# Install Python dependencies
 RUN pip install --no-cache-dir fastapi uvicorn pandas scikit-learn joblib
 
-# Expose port
+# Expose the port
 EXPOSE 8000
 
 # Command to run the app
