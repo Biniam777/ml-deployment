@@ -1,17 +1,16 @@
 # Use official Python image
 FROM python:3.11-slim
 
-# Set working directory
+# Set working directory inside container to backend
 WORKDIR /app
 
-# Copy backend folder contents into /app
-COPY . /app
+# Copy only the backend folder contents into /app
+COPY backend/ /app/
 
-
-# Install Python dependencies
+# Install dependencies
 RUN pip install --no-cache-dir fastapi uvicorn pandas scikit-learn joblib
 
-# Expose the port
+# Expose port
 EXPOSE 8000
 
 # Command to run the app
