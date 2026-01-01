@@ -1,30 +1,38 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import joblib
 import pandas as pd
 from pathlib import Path
 
 # -----------------------
-# APP INIT 
+# APP INIT
 # -----------------------
 app = FastAPI(title="Breast Cancer Prediction API")
 
 # -----------------------
-# CORS
+# CORS 
 # -----------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # allow all origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
+# -----------------------
+# PATHS
+# -----------------------
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR / "models"
+STATIC_DIR = BASE_DIR / "static"
 
+# -----------------------
+# LOAD MODELS
+# -----------------------
 try:
     lr_model = joblib.load(MODEL_DIR / "logistic_regression.joblib")
     dt_model = joblib.load(MODEL_DIR / "decision_tree.joblib")
@@ -42,22 +50,24 @@ FEATURE_NAMES = [
     "mean area",
     "mean smoothness"
 ]
-
 EXPECTED_FEATURES = len(FEATURE_NAMES)
-
 
 class CancerInput(BaseModel):
     features: list[float]
 
+# -----------------------
+# SERVE STATIC FILES
+# -----------------------
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-# -----------------------
-# ROUTES
-# -----------------------
 @app.get("/")
 def root():
-    return {"message": "Breast Cancer Prediction API is running"}
+    """Serve the index.html"""
+    return FileResponse(STATIC_DIR / "index.html")
 
-
+# -----------------------
+# API ROUTES
+# -----------------------
 @app.post("/predict/logistic")
 def predict_logistic(data: CancerInput):
     if len(data.features) != EXPECTED_FEATURES:
@@ -74,7 +84,6 @@ def predict_logistic(data: CancerInput):
         "model": "Logistic Regression",
         "prediction": prediction
     }
-
 
 @app.post("/predict/tree")
 def predict_tree(data: CancerInput):
