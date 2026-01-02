@@ -1,74 +1,136 @@
-# Breast Cancer Prediction Project
+# Breast Cancer Prediction System
 
-This project is a Machine Learning deployment example that predicts breast cancer based on input features. It consists of a FastAPI backend and a simple HTML frontend.
+A Machine Learning deployment project that predicts breast cancer diagnosis (Benign/Malignant) based on tumor measurements. The system features a FastAPI backend serving a scikit-learn model and an interactive HTML frontend.
 
-## Project Structure
+## 🚀 Features
 
-- **backend/**: Contains the FastAPI application and ML models.
-  - `main.py`: The API server code.
-  - `models/`: Directory containing pre-trained `.joblib` models (Logistic Regression, Decision Tree) and a scaler.
-- **frontend/**: Contains the user interface.
-  - `index.html`: A simple HTML page to interact with the API.
+- **Dual Model Support**: Choose between Logistic Regression and Decision Tree models for prediction.
+- **Interactive UI**: User-friendly web interface for easy data entry and visualization.
+- **RESTful API**: robust backend API built with FastAPI.
+- **Dockerized**: Ready for containerized deployment.
 
-## Prerequisites
+## 🛠️ Tech Stack
 
-- Python 3.x
+- **Backend**: Python, FastAPI, Uvicorn
+- **ML Libraries**: Scikit-learn, Pandas, NumPy, Joblib
+- **Frontend**: HTML5, CSS3, JavaScript
+- **Containerization**: Docker
+
+## 📂 Project Structure
+
+```
+ml-deployment/
+├── backend/
+│   ├── models/                 # Pre-trained ML models (.joblib)
+│   ├── static/                 # Frontend assets (index.html)
+│   ├── Dockerfile              # Docker configuration
+│   ├── main.py                 # FastAPI application entry point
+│   ├── Procfile                # Deployment configuration
+│   └── requirements.txt        # Python dependencies
+└── README.md
+```
+
+## 🏁 Getting Started
+
+### Prerequisites
+
+- Python 3.11+
 - pip
+- Docker (optional)
 
-## Setup and Installation
+### 🔧 Local Installation
 
-1. **Navigate to the project folder.**
+1. **Clone the repository**
 
-2. **Navigate to the backend directory:**
+   ```bash
+   git clone <repository-url>
+   cd ml-deployment
+   ```
+
+2. **Navigate to the backend directory**
 
    ```bash
    cd backend
    ```
 
-3. **Install dependencies:**
+3. **Install dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
 
-## Running the Application
-
-1. **Start the Backend Server:**
-   From the `backend` directory, run:
+4. **Run the application**
 
    ```bash
    uvicorn main:app --reload
    ```
 
-   The API will be available at `http://127.0.0.1:8000`.
+5. **Access the application**
+   Open your browser and navigate to `http://127.0.0.1:8000` to use the web interface.
 
-2. **Open the Frontend:**
-   Open `frontend/index.html` in your web browser. You can simply double-click the file or serve it using a simple HTTP server.
+### 🐳 Docker Usage
 
-## API Endpoints
+1. **Build the Docker image**
+   Run this command from the **root** of the project (`ml-deployment/`):
 
-- `GET /`: Health check. Returns a welcome message.
-- `POST /predict/logistic`: Predicts using the Logistic Regression model.
-- `POST /predict/tree`: Predicts using the Decision Tree model.
+   ```bash
+   docker build -t breast-cancer-api -f backend/Dockerfile .
+   ```
 
-### Input Format
+2. **Run the container**
 
-Both prediction endpoints expect a JSON body with a list of 5 float features:
+   ```bash
+   docker run -p 8000:8000 breast-cancer-api
+   ```
 
-```json
-{
-  "features": [
-    14.0, // mean radius
-    20.5, // mean texture
-    90.0, // mean perimeter
-    600.0, // mean area
-    0.1 // mean smoothness
-  ]
-}
-```
+3. **Access the application**
+   Visit `http://localhost:8000` in your browser.
 
-## Features Used
+## 📡 API Endpoints
 
-The models expect the following 5 features in this order:
+The API provides the following endpoints:
+
+### 1. Web Interface
+
+- **URL**: `/`
+- **Method**: `GET`
+- **Description**: Serves the HTML frontend.
+
+### 2. Logistic Regression Prediction
+
+- **URL**: `/predict/logistic`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  {
+    "features": [17.99, 10.38, 122.8, 1001.0, 0.1184]
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "model": "Logistic Regression",
+    "prediction": 0
+  }
+  ```
+  _(0 = Benign, 1 = Malignant)_
+
+### 3. Decision Tree Prediction
+
+- **URL**: `/predict/tree`
+- **Method**: `POST`
+- **Body**: Same as above.
+- **Response**:
+  ```json
+  {
+    "model": "Decision Tree",
+    "prediction": 1
+  }
+  ```
+
+## 📝 Input Features
+
+The models expect the following 5 features in order:
 
 1. Mean Radius
 2. Mean Texture
